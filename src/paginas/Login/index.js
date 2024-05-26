@@ -15,39 +15,36 @@ import {
 
 export default function Login() {
   const navigation = useNavigation();
-  const [login, setLogin] = useState({ email: "felipegay@gmail.com", senha: "9931" });
+  const [login, setLogin] = useState({ email: '', senha: '' });
   let idR = 0
   const [carregando, setCarregando] = useState(false);
 
   if (carregando) {
     return <ActivityIndicator size="large" color="#0000ff" />
   }
-  
+
 
   const realizarLogin = async () => {
     setCarregando(true)
-    //if
     for (let propriedade in login) {
       if (login.hasOwnProperty(propriedade)) {
         if (login[propriedade] === null || login[propriedade] === '') {
-          Alert.alert(`O campo ${propriedade} é obrigatório.`); 
-        } else {
-          await axios.post('http://192.168.0.8:3000/login', login).then(function (resposta) {
-              idR = resposta.data.idRestaurante 
-              setLogin({email: '', senha: ''})
-              navigation.navigate('Cardapio', { idR: idR });
-          }).catch(function (erro) {
-              console.log(erro);
-          })
+          Alert.alert(`O campo ${propriedade} é obrigatório.`);
+          return;
         }
-    }
-    }
-    
 
-    //Fim if
-    
+      }
+    }
+    console.log(login)
+    await axios.post('http://192.168.0.8:3000/login', login).then(function (resposta) {
+      idR = resposta.data.idRestaurante
+      setLogin({ email: '', senha: '' })
+      navigation.navigate('Cardapio', { idR: idR });
+    }).catch(function (erro) {
+      console.log(erro);
+    })
     setCarregando(false)
-};
+  };
 
   return (
     <ScrollView style={{ backgroundColor: '#ffffff' }}>
@@ -60,12 +57,12 @@ export default function Login() {
         <View style={styles.containerForm}>
           <Text style={{ color: "#EA8841", fontSize: 40, textAlign: "center", marginTop: "10%" }}>Login</Text>
           <View style={{ flexDirection: "row", borderBottomWidth: 1, width: "85%", marginLeft: "7%", marginTop: "10%" }}>
-            <Image source={require("../../assets/imagens/Documents.png")} style={{ width: 26, marginRight: "3%", }} />
+            <Image source={require("../../assets/imagens/Letter.png")} style={{ width: 26, marginRight: "3%", }} />
             <TextInput
               placeholder="Email"
               value={login.email}
               onChangeText={(text) => setLogin({ ...login, email: text })}
-              style={{ marginLeft: "3%" }}
+              style={{ marginLeft: "3%", width:'85%'}}
             />
           </View>
           <View style={{ flexDirection: "row", borderBottomWidth: 1, width: "85%", marginLeft: "7%", marginTop: "10%" }}>
@@ -74,7 +71,7 @@ export default function Login() {
               placeholder="Senha"
               value={login.senha}
               onChangeText={(text) => setLogin({ ...login, senha: text })}
-              style={{ marginLeft: "5%" }}
+              style={{ marginLeft: "5%", width:'85%' }}
             />
           </View>
           <View style={{ flexDirection: "row", alignSelf: "center", marginTop: "5%" }}>
@@ -86,10 +83,10 @@ export default function Login() {
             </TouchableOpacity>
           </View>
           <TouchableOpacity style={styles.button} onPress={realizarLogin}>
-            <Text style={{color: '#fff'}}>Entrar</Text>
+            <Text style={{ color: '#fff' }}>Entrar</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Cliente')}>
-            <Text style={{color: '#fff'}}>Área do cliente</Text>
+            <Text style={{ color: '#fff' }}>Área do cliente</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -129,6 +126,6 @@ const styles = StyleSheet.create({
     marginTop: "11%",
     alignItems: "center",
     justifyContent: "center",
-    
+
   },
 });

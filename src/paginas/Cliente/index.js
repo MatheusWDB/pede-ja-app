@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Image, ActivityIndicator, StyleSheet, ScrollView, Button, Modal, TextInput, Alert, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { TextInputMask, TextMask } from 'react-native-masked-text';
 
 export default function Cliente() {
 
   const [Pratos, setPratos] = useState([])
   const [idR, setIdR] = useState(0);
-  const [cliente, setCliente] = useState({ nome: 'Matheus', telefone: '1234567890', mesa: '18' });
+  const [cliente, setCliente] = useState({ nome: '', telefone: '', mesa: '' });
   const [formVisible, setFormVisible] = useState(false);
   const [selectedPrato, setSelectedPrato] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -193,15 +194,15 @@ export default function Cliente() {
           <TextInput
             placeholder="Nome"
             value={cliente.nome}
-            onChangeText={(text) => setCliente((prev) => ({ nome: text }))}
+            onChangeText={(text) => setCliente({...cliente,  nome: text })}
             style={{ borderWidth: 1, width: 200, textAlign: 'center' }}
           />
-          <TextInput
+          <TextInputMask
             placeholder="Telefone"
-            onChangeText={(text) => setCliente((prev) => ({ telefone: text }))}
+            value={cliente.telefone}
+            onChangeText={(text) => setCliente( {...cliente, telefone: text })}
             type="cel-phone"
             keyboardType='phone-pad'
-            value={cliente.telefone}
             options={{
               maskType: "BRL",
               withDDD: true,
@@ -213,7 +214,7 @@ export default function Cliente() {
             placeholder="Mesa"
             value={cliente.mesa}
             keyboardType='number-pad'
-            onChangeText={(text) => setCliente((prev) => ({ mesa: text }))}
+            onChangeText={(text) => setCliente( {...cliente, mesa: text })}
             style={{ borderWidth: 1, width: 200, textAlign: 'center' }}
           />
           <TouchableOpacity style={styles.button} onPress={handleFormSubmit}>
@@ -288,7 +289,7 @@ export default function Cliente() {
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ fontWeight: 'bold', color: '#EA8841', fontSize: 20, alignSelf: 'center', }}>Seu Pedido</Text>
           </View>
-          <View style={{ borderWidth: 0, flexDirection: 'row', flex: 0.1, marginBottom: 10 }}>
+          <View style={{ borderWidth: 0, flexDirection: 'row', flex: 0.3, marginBottom: 15 }}>
 
             <View style={{ flex: 1, alignItems: 'center' }}>
               <Text style={styles.textInput}>Nome:</Text>

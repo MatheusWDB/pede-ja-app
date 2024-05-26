@@ -52,24 +52,22 @@ export default function Pedidos({ route }) {
   };
 
   const handleOrderDone = async () => {
-    setIsLoading(true);
     const idP = parseInt(selectedItem.idPedido, 10);
     await axios.put(`http://192.168.0.8:3000/${idR}/pedidos/${idP}`)
       .then(() => {
         setSelectedItem(null);
         setPedidoDeletado(true);
+        setVisibleModal(false)
       })
       .catch((error) => {
         console.error(error);
       });
-    setIsLoading(false);
   };
 
   const handleDeleteOrder = async () => {
-    setIsLoading(true);
     const idP = parseInt(selectedItem.idPedido, 10);
     await axios.delete(`http://192.168.0.8:3000/${idR}/pedidos/${idP}`)
-      .then((response) => {
+      .then(() => {
         setSelectedItem(null);
         setVisibleModal(false);
         setPedidoDeletado(true);
@@ -77,7 +75,6 @@ export default function Pedidos({ route }) {
       .catch((error) => {
         console.error("Erro ao excluir pedido:", error);
       });
-    setIsLoading(false);
   };
 
   return (
@@ -136,93 +133,94 @@ export default function Pedidos({ route }) {
         </View>
       </View>
 
-      {selectedItem && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
-          visible={visibleModal}
-          onRequestClose={() => {
-            setVisibleModal(!visibleModal);
-          }}
-        >
-          <View style={{ flex: 1, borderWidth: 1, backgroundColor: 'white', padding: 20, borderRadius: 5, }}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+        visible={visibleModal}
+      >
+        <View style={{ flex: 1 }}>
+          {selectedItem && (
 
-            <View style={{ flexDirection: "row", marginBottom: 0, height: 55, borderWidth: 1, }}>
-              <View style={{ flex: 1, alignItems: "center" }}>
-                <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Cliente: ${selectedItem.cliente}`}</Text>
-              </View>
-              <View style={{ flex: 1, alignItems: "center" }}>
-                <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Telefone: ${selectedItem.telefone}`}</Text>
-              </View>
-              <View style={{ flex: 1, alignItems: "center" }}>
-                <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Mesa: ${selectedItem.mesa}`}</Text>
-              </View>
-            </View>
+            <View style={{ flex: 1, borderWidth: 1, backgroundColor: 'white', padding: 20, borderRadius: 5, }}>
 
-            <View style={{ flexDirection: "row", borderWidth: 0, marginBottom: 0, padding: 5 }}>
-              <View style={{ flex: 1, alignItems: "center" }}>
-                <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Pedido n°: ${selectedItem.numeroPedido}`}</Text>
+              <View style={{ flexDirection: "row", marginBottom: 0, height: 55, borderWidth: 1, }}>
+                <View style={{ flex: 1, alignItems: "center" }}>
+                  <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Cliente: ${selectedItem.cliente}`}</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: "center" }}>
+                  <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Telefone: ${selectedItem.telefone}`}</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: "center" }}>
+                  <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Mesa: ${selectedItem.mesa}`}</Text>
+                </View>
               </View>
-              <View style={{ flex: 1, alignItems: "center" }}>
-                <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Finalizado: ${selectedItem.finalizado}`}</Text>
-              </View>
-            </View>
 
-            <View style={{ flexDirection: "row", marginBottom: 10, borderWidth: 0, padding: 3.6 }}>
-              <View style={{ flex: 1, alignItems: "center" }}>
-                <Text style={{ fontWeight: "bold", color: "#EA8841" }}>Nome:</Text>
+              <View style={{ flexDirection: "row", borderWidth: 0, marginBottom: 0, padding: 5 }}>
+                <View style={{ flex: 1, alignItems: "center" }}>
+                  <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Pedido n°: ${selectedItem.numeroPedido}`}</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: "center" }}>
+                  <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Finalizado: ${selectedItem.finalizado}`}</Text>
+                </View>
               </View>
-              <View style={{ flex: 1, alignItems: "center" }}>
-                <Text style={{ fontWeight: "bold", color: "#EA8841" }}>Qtd:</Text>
-              </View>
-              <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                <Text style={{ fontWeight: "bold", color: "#EA8841" }}>Valor:</Text>
-              </View>
-              <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                <Text style={{ fontWeight: "bold", color: "#EA8841" }}>Observação:</Text>
-              </View>
-            </View>
 
-            <View style={{ flex: 2, borderWidth: 1, }}>
-              <ScrollView>
-                {selectedItem.pratos.map((prato, index) => (
-                  <View key={index} style={{ flexDirection: "row", borderBottomWidth: 1, width: '100%', marginBottom: 5, alignItems: "center" }}>
-                    <View style={{ flex: 1, alignItems: 'center' }}>
-                      <Text>{prato.nome}</Text>
+              <View style={{ flexDirection: "row", marginBottom: 10, borderWidth: 0, padding: 3.6 }}>
+                <View style={{ flex: 1, alignItems: "center" }}>
+                  <Text style={{ fontWeight: "bold", color: "#EA8841" }}>Nome:</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: "center" }}>
+                  <Text style={{ fontWeight: "bold", color: "#EA8841" }}>Qtd:</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: 'flex-start' }}>
+                  <Text style={{ fontWeight: "bold", color: "#EA8841" }}>Valor:</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: 'flex-start' }}>
+                  <Text style={{ fontWeight: "bold", color: "#EA8841" }}>Observação:</Text>
+                </View>
+              </View>
+
+              <View style={{ flex: 2, borderWidth: 1, }}>
+                <ScrollView>
+                  {selectedItem.pratos.map((prato, index) => (
+                    <View key={index} style={{ flexDirection: "row", borderBottomWidth: 1, width: '100%', marginBottom: 5, alignItems: "center" }}>
+                      <View style={{ flex: 1, alignItems: 'center' }}>
+                        <Text>{prato.nome}</Text>
+                      </View>
+                      <View style={{ flex: 1, alignItems: 'center' }}>
+                        <Text>{`x${prato.quantidade}`}</Text>
+                      </View>
+                      <View style={{ flex: 1, alignItems: "flex-start" }}>
+                        <Text>{`R$ ${(prato.valor * prato.quantidade).toFixed(2)}`}</Text>
+                      </View>
+                      <View style={{ flex: 1, alignItems: 'flex-start' }}>
+                        <Text>{prato.observacao ? prato.observacao : 'N/A'}</Text>
+                      </View>
                     </View>
-                    <View style={{ flex: 1, alignItems: 'center' }}>
-                      <Text>{`x${prato.quantidade}`}</Text>
-                    </View>
-                    <View style={{ flex: 1, alignItems: "flex-start" }}>
-                      <Text>{`R$ ${(prato.valor * prato.quantidade).toFixed(2)}`}</Text>
-                    </View>
-                    <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                      <Text>{prato.observacao ? prato.observacao : 'N/A'}</Text>
-                    </View>
-                  </View>
-                ))}
-              </ScrollView>
+                  ))}
+                </ScrollView>
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontWeight: "bold", color: "#EA8841", marginTop: 10, }}>{`Valor Total: ${selectedItem.valorTotal}`}</Text>
+
+                <TouchableOpacity style={styles.button} onPress={handleOrderDone}>
+                  <Text>Pedido feito</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.button} onPress={handleDeleteOrder}>
+                  <Text>Excluir Pedido</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.button} onPress={() => setVisibleModal(false)}>
+                  <Text>Fechar </Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontWeight: "bold", color: "#EA8841", marginTop: 10, }}>{`Valor Total: ${selectedItem.valorTotal}`}</Text>
-
-              <TouchableOpacity style={styles.button} onPress={handleOrderDone}>
-                <Text>Pedido feito</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.button} onPress={handleDeleteOrder}>
-                <Text>Excluir Pedido</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.button} onPress={() => setVisibleModal(false)}>
-                <Text>Fechar </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-      )}
+          )}
+        </View>
+      </Modal>
 
     </View>
   );
