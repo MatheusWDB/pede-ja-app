@@ -117,8 +117,10 @@ export default function Cardapio({ route }) {
   }, [pratoCriado]);
 
   const handleSelectPrato = async (prato) => {
+    Carregando(true);
     setSelectedPrato(prato);
     setSelecionar(true);
+    Carregando(false);
   };
 
   const atualizarPrato = async () => {
@@ -178,7 +180,7 @@ export default function Cardapio({ route }) {
         <Text style={{ color: "#fff", fontSize: 36 }}>PEDE</Text>
         <Image
           source={require('../../assets/imagens/burger.png')}
-          />
+        />
         <Text style={{ color: "#fff", fontSize: 36 }}>JÁ</Text>
         <TouchableOpacity >
           <Text style={{ fontSize: 24, color: '#ffffff', left: '300%' }} onPress={() => setMenu(true)}
@@ -218,7 +220,6 @@ export default function Cardapio({ route }) {
       </Modal>
 
       <View style={{ flex: 10, backgroundColor: '#ffffff' }}>
-
         <FlatList
           data={data}
           keyExtractor={(item) => item.idPrato.toString()}
@@ -227,12 +228,15 @@ export default function Cardapio({ route }) {
               <ScrollView>
 
                 <View style={styles.info}>
-                  {item.imagem ?
-                    <Image
-                      style={{ width: 90, height: 90, borderRadius: 15 }}
-                      source={{ uri: `data:image/jpeg;base64,${item.imagem}` }}
-                    /> : null
-                  }
+                  <View style={{ width: 90, height: 90, backgroundColor: 'gray', borderRadius: 15 }}>
+
+                    {item.imagem ?
+                      <Image
+                        style={{ width: 90, height: 90, borderRadius: 15 }}
+                        source={{ uri: `data:image/jpeg;base64,${item.imagem}` }}
+                      /> : null
+                    }
+                  </View>
                   <View style={styles.infoTexto}>
                     <Text style={{ fontWeight: 'bold', fontSize: 20 }}>{item.nome}</Text>
                     <Text >{item.ingredientes ? item.ingredientes.join(', ') : 'Ingredientes não disponíveis'}</Text>
@@ -247,57 +251,20 @@ export default function Cardapio({ route }) {
         />
 
       </View>
-
-      <Modal visible={adicionar} animationType="slide">
-        <View style={styles.modalView}>
-          {newPrato.imagem ?
-            <Image
-              style={{ width: 150, height: 150, borderRadius: 15, alignSelf: 'center' }}
-              source={{ uri: `data:image/jpeg;base64,${newPrato.imagem}` }}
-            /> : null
-          }
-
-          <TextInput
-            placeholder="Nome"
-            onChangeText={(text) => setNewPrato({ ...newPrato, nome: text })}
-          />
-
-          <TextInput
-            placeholder="Valor"
-            keyboardType="numeric"
-            onChangeText={(text) => setNewPrato({ ...newPrato, valor: text.replace(',', '.') })}
-          />
-
-          <TextInput
-            placeholder="Ingredientes"
-            onChangeText={(text) => setNewPrato({ ...newPrato, ingredientes: text.split(', ') })}
-          />
-
-          <TouchableOpacity onPress={escolherImagem} style={styles.button}>
-            <Text style={{ color: '#fff' }}>Escolher a imagem</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={tirarFoto} style={styles.button}>
-            <Text style={{ color: '#fff' }}>Tirar foto</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={criarPrato} style={styles.button}>
-            <Text style={{ color: '#fff' }}>Enviar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={(cancelarPrato)} style={styles.button}>
-            <Text style={{ color: '#fff' }}>Cancelar</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
-
+      
       <Modal visible={selecionar} animationType="slide">
         <View style={{ flex: 1 }}>
           {selectedPrato && (
             <View>
-              {selectedPrato.imagem ?
-                <Image
-                  style={{ width: 150, height: 150, borderRadius: 15, alignSelf: 'center' }}
-                  source={{ uri: `data:image/jpeg;base64,${selectedPrato.imagem}` }}
-                /> : null
-              }
+              <View style={{ width: 150, height: 150, backgroundColor: 'gray', borderRadius: 15, justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }}>
+                {selectedPrato.imagem ?
+                  <Image
+                    style={{ width: 150, height: 150, borderRadius: 15, alignSelf: 'center' }}
+                    source={{ uri: `data:image/jpeg;base64,${selectedPrato.imagem}` }}
+                  /> : null
+                }
+              </View>
+
               <View style={styles.selecionar}>
                 <Text style={styles.textInput}>Nome:</Text>
                 <TextInput
@@ -334,6 +301,48 @@ export default function Cardapio({ route }) {
           </TouchableOpacity>
           <TouchableOpacity onPress={deletarPrato} style={styles.button}>
             <Text style={{ color: '#fff' }}>Deletar</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
+      <Modal visible={adicionar} animationType="slide">
+        <View style={styles.modalView}>
+          <View style={{ width: 90, height: 90, backgroundColor: 'gray', borderRadius: 15 }}>
+            {newPrato.imagem ?
+              <Image
+                style={{ width: 150, height: 150, borderRadius: 15, alignSelf: 'center' }}
+                source={{ uri: `data:image/jpeg;base64,${newPrato.imagem}` }}
+              /> : null
+            }
+          </View>
+
+          <TextInput
+            placeholder="Nome"
+            onChangeText={(text) => setNewPrato({ ...newPrato, nome: text })}
+          />
+
+          <TextInput
+            placeholder="Valor"
+            keyboardType="numeric"
+            onChangeText={(text) => setNewPrato({ ...newPrato, valor: text.replace(',', '.') })}
+          />
+
+          <TextInput
+            placeholder="Ingredientes"
+            onChangeText={(text) => setNewPrato({ ...newPrato, ingredientes: text.split(', ') })}
+          />
+
+          <TouchableOpacity onPress={escolherImagem} style={styles.button}>
+            <Text style={{ color: '#fff' }}>Escolher a imagem</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={tirarFoto} style={styles.button}>
+            <Text style={{ color: '#fff' }}>Tirar foto</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={criarPrato} style={styles.button}>
+            <Text style={{ color: '#fff' }}>Enviar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={(cancelarPrato)} style={styles.button}>
+            <Text style={{ color: '#fff' }}>Cancelar</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -444,6 +453,6 @@ const styles = StyleSheet.create({
   },
   textInput: {
     borderWidth: 0,
-    marginRight: '65%',    
-  }
+    marginRight: '65%',
+  },
 });
