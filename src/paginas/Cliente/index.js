@@ -1,13 +1,13 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Image, ActivityIndicator, StyleSheet, ScrollView, Button, Modal, TextInput, Alert, TouchableOpacity } from 'react-native';
 import axios from 'axios';
-import { TextInputMask } from 'react-native-masked-text';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 
-export default function Cliente({ route }) {
+export default function Cliente() {
   const [Pratos, setPratos] = useState([])
-  const  idR  = 2;
+  const [idR, setIdR] = useState(2);
   const [cliente, setCliente] = useState({ nome: '', telefone: '', mesa: '' });
-  const [formVisible, setFormVisible] = useState(true);
+  const [formVisible, setFormVisible] = useState(false);
   const [selectedPrato, setSelectedPrato] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [observacao, setObservacao] = useState('');
@@ -16,14 +16,46 @@ export default function Cliente({ route }) {
   const [pedidoVisible, setPedidoVisible] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [modalQrcode, setModalQrcode] = useState(true)
-  const [hasPermission, setHasPermission] = useState(null);
-  const [scanned, setScanned] = useState(false);
+  const [facing, setFacing] = useState('back');
+  const [permission, requestPermission] = useCameraPermissions();
+
+  const handleBarCodeScanned = ({ type, data }) => {
+    setScanned(true);
+    setScannedData(data);
+    setIdR(data);
+    console.log(idR)
+    if (data) {
+      setModalQrcode(false);
+      setFormVisible(true)
+    }
+
+  };
+
+  if (!permission) {
+    // Camera permissions are still loading.
+    return <View />;
+  }
+
+  if (!permission.granted) {
+    // Camera permissions are not granted yet.
+    return (
+      <View style={styles.container}>
+        <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
+        <Button onPress={requestPermission} title="grant permission" />
+      </View>
+    );
+  }
+
+  function toggleCameraFacing() {
+    setFacing(current => (current === 'back' ? 'front' : 'back'));
+  }
 
   if (carregando) {
     return <ActivityIndicator size="large" color="#0000ff" />
   }
 
   const fetchPratos = async () => {
+    setCarregando(true);
     await axios.get(`http://192.168.0.8:3000/${idR}/cardapio`)
       .then(function (resposta) {
         setPratos(resposta.data)
@@ -31,6 +63,7 @@ export default function Cliente({ route }) {
       .catch(function (erro) {
         console.log(erro);
       });
+    setCarregando(false);
   };
 
   const handleFormSubmit = () => {
@@ -93,141 +126,147 @@ export default function Cliente({ route }) {
   };
 
   return (
-    <ScrollView style={{ backgroundColor: '#ffffff' }}>
 
-      <View style={styles.container}>
-        <View style={styles.containerLogo}>
-          <Text style={{ color: "#fff", fontSize: 36 }}>PEDE</Text>
+    <View style={styles.container}>
+      <View style={styles.containerLogo}>
+        <Text style={{ color: "#fff", fontSize: 36 }}>PEDE</Text>
 
-          <Image
-            source={require('../../assets/imagens/burger.png')}
-            style={{}}
+        <Image
+          source={require('../../assets/imagens/burger.png')}
+          style={{}}
+        />
+
+        <Text style={{ color: "#fff", fontSize: 36 }}>JÁ</Text>
+      </View>
+
+      <View style={styles.containerForm}>
+        <Modal visible={formVisible} animationType="slide">
+          <TextInput
+            placeholder="Nome"
+            onChangeText={(text) => setCliente((prev) => ({ nome: text }))}
           />
+          <TextInput
+            placeholder="Telefone"
+            onChangeText={(text) => setCliente((prev) => ({ telefone: text }))}
+            type="cel-phone"
+            options={{
+              maskType: "BRL",
+              withDDD: true,
+              dddMask: '(99) '
+            }}
+          />
+          <TextInput
+            placeholder="Mesa"
+            keyboardType='number-pad'
+            onChangeText={(text) => setCliente((prev) => ({ mesa: text }))}
+          />
+          <TouchableOpacity style={styles.button} onPress={handleFormSubmit}>
+            <Text>Enviar</Text>
+          </TouchableOpacity>
+        </Modal>
 
-          <Text style={{ color: "#fff", fontSize: 36 }}>JÁ</Text>
-        </View>
+        <Modal visible={isModalVisible} animationType="slide">
+          {selectedPrato && (
+            <>
+              {selectedPrato.imagem ?
+                <Image
+                  style={{ width: 90, height: 90, borderRadius: 100, alignSelf: 'center' }}
+                  source={{ uri: `data:image/jpeg;base64,${selectedPrato.imagem}` }}
+                /> : null
+              }
 
-        <View style={styles.containerForm}>
-          <Modal visible={formVisible} animationType="slide">
-            <TextInput
-              placeholder="Nome"
-              onChangeText={(text) => setCliente({ nome: text })}
-            />
-            <TextInputMask
-              placeholder="Telefone"
-              onChangeText={(text) => setCliente({ telefone: text })}
-              type="cel-phone"
-              options={{
-                maskType: "BRL",
-                withDDD: true,
-                dddMask: '(99) '
-              }}
-            />
-            <TextInput
-              placeholder="Mesa"
-              keyboardType='number-pad'
-              onChangeText={(text) => setCliente({ mesa: text })}
-            />
-            <TouchableOpacity style={styles.button} onPress={handleFormSubmit}>
-              <Text>Enviar</Text>
+              <Text style={{ alignSelf: 'center' }}>Nome: {selectedPrato.nome}</Text>
+              <Text style={{ alignSelf: 'center' }}>Valor: R${selectedPrato.valor.replace('.', ',')}</Text>
+              <Text style={{ alignSelf: 'center' }}>Ingredientes: {selectedPrato.ingredientes ? selectedPrato.ingredientes.join(', ') : 'Ingredientes não disponíveis'}</Text>
+              <TextInput
+                placeholder="Observação"
+                onChangeText={(text) => setObservacao(text)}
+                style={{ alignSelf: 'center' }}
+              />
+
+              <View style={{ flexDirection: 'row', alignSelf: 'center', marginBottom: '10%' }}>
+
+                <Button title="-" onPress={() => setQuantidade(Math.max(1, quantidade - 1))} />
+                <Text>{quantidade}</Text>
+                <Button title="+" onPress={() => setQuantidade(quantidade + 1)} />
+              </View>
+            </>
+          )}
+
+          <TouchableOpacity onPress={handleAddPedido} style={styles.button}>
+            <Text>Adicionar ao Pedido</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => { setModalVisible(false); setSelectedPrato(null); }} style={styles.button2} >
+            <Text>Cancelar</Text>
+          </TouchableOpacity>
+        </Modal>
+
+        <Modal visible={modalQrcode} animationType='slide'>
+          <View style={{ flex: 1 }}>
+            <Text style={{ textAlign: 'center', marginTop: 20 }}>Aponte a câmera para o código QR</Text>
+
+
+            <CameraView style={styles.camera} facing={facing} onBarcodeScanned={handleBarCodeScanned}>
+              <View style={styles.buttonContainer}>
+              </View>
+            </CameraView>
+
+
+            <TouchableOpacity onPress={() => setModalQrcode(false)} style={{ position: 'absolute', bottom: 20, alignSelf: 'center', backgroundColor: 'white', padding: 10, borderRadius: 10 }}>
+              <Text>Fechar</Text>
             </TouchableOpacity>
-          </Modal>
+          </View>
+        </Modal>
 
-          <Modal visible={isModalVisible} animationType="slide">
-            {selectedPrato && (
-              <>
-                {selectedPrato.imagem ?
-                  <Image
-                    style={{ width: 90, height: 90, borderRadius: 100, alignSelf: 'center' }}
-                    source={{ uri: `data:image/jpeg;base64,${selectedPrato.imagem}` }}
-                  /> : null
-                }
-
-                <Text style={{ alignSelf: 'center' }}>Nome: {selectedPrato.nome}</Text>
-                <Text style={{ alignSelf: 'center' }}>Valor: R${selectedPrato.valor.replace('.', ',')}</Text>
-                <Text style={{ alignSelf: 'center' }}>Ingredientes: {selectedPrato.ingredientes ? selectedPrato.ingredientes.join(', ') : 'Ingredientes não disponíveis'}</Text>
-                <TextInput
-                  placeholder="Observação"
-                  onChangeText={(text) => setObservacao(text)}
-                  style={{ alignSelf: 'center' }}
-                />
-
-                <View style={{ flexDirection: 'row', alignSelf: 'center', marginBottom: '10%' }}>
-
-                  <Button title="-" onPress={() => setQuantidade(Math.max(1, quantidade - 1))} />
-                  <Text>{quantidade}</Text>
-                  <Button title="+" onPress={() => setQuantidade(quantidade + 1)} />
-                </View>
-              </>
-            )}
-
-            <TouchableOpacity onPress={handleAddPedido} style={styles.button}>
-              <Text>Adicionar ao Pedido</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => { setModalVisible(false); setSelectedPrato(null); }} style={styles.button2} >
-              <Text>Cancelar</Text>
-            </TouchableOpacity>
-          </Modal>
-
-          <Modal visible={!modalQrcode} animationType='slide'>
-            <View >
-              {scanned && <Button title={'Toque para escanear novamente'} onPress={() => setScanned(false)} />}
-              <TouchableOpacity onPress={() => setModalQrcode(false)}>
-                <Text>Fechar</Text>
-              </TouchableOpacity>
-            </View>
-          </Modal>
-
-          <Modal visible={pedidoVisible} animationType="slide">
-            <FlatList
-              data={pedidos.slice(1)}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <View style={{ marginTop: '10%' }}>
-                  <Text>Nome: {item.nome}</Text>
-                  <Text>Quantidade: {item.quantidade}</Text>
-                  <Text>Observação: {item.observacao}</Text>
-
-                </View>
-              )}
-            />
-            <Text>Valor Final: R$</Text>
-            <Button title="Confirmar Pedido" onPress={handleConfirmarPedido} />
-            <Button title="Cancelar" onPress={() => setPedidoVisible(false)} />
-          </Modal>
-
+        <Modal visible={pedidoVisible} animationType="slide">
           <FlatList
-            data={Pratos}
-            keyExtractor={(item) => item.idPrato.toString()}
+            data={pedidos.slice(1)}
+            keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
-              <View style={styles.pratoItem}>
-                {item.imagem ?
-                  <Image
-                    style={{ width: 90, height: 90, alignSelf: 'center', borderRadius: 100 }}
-                    source={{ uri: `data:image/jpeg;base64,${item.imagem}` }}
-                  /> : null
-                }
-                <Text style={{ alignSelf: 'center' }}>{item.nome}</Text>
-                <Text style={{ alignSelf: 'center' }}>R${item.valor.replace('.', ',')}</Text>
-                <Text style={{ alignSelf: 'center' }}>{item.ingredientes ? item.ingredientes.join(', ') : 'Ingredientes não disponíveis'}</Text>
-                <TouchableOpacity style={styles.button2} onPress={() => handleSelectPrato(item)}>
-                  <Text>Selecionar</Text>
-                </TouchableOpacity>
+              <View style={{ marginTop: '10%' }}>
+                <Text>Nome: {item.nome}</Text>
+                <Text>Quantidade: {item.quantidade}</Text>
+                <Text>Observação: {item.observacao}</Text>
 
               </View>
             )}
           />
-          <TouchableOpacity onPress={handleFinalizarPedido} style={styles.button2}>
-            <Text>Finalizar Pedido</Text>
-          </TouchableOpacity>
+          <Text>Valor Final: R$</Text>
+          <Button title="Confirmar Pedido" onPress={handleConfirmarPedido} />
+          <Button title="Cancelar" onPress={() => setPedidoVisible(false)} />
+        </Modal>
 
+        <FlatList
+          data={Pratos}
+          keyExtractor={(item) => item.idPrato.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.pratoItem}>
+              {item.imagem ?
+                <Image
+                  style={{ width: 90, height: 90, alignSelf: 'center', borderRadius: 100 }}
+                  source={{ uri: `data:image/jpeg;base64,${item.imagem}` }}
+                /> : null
+              }
+              <Text style={{ alignSelf: 'center' }}>{item.nome}</Text>
+              <Text style={{ alignSelf: 'center' }}>R${item.valor.replace('.', ',')}</Text>
+              <Text style={{ alignSelf: 'center' }}>{item.ingredientes ? item.ingredientes.join(', ') : 'Ingredientes não disponíveis'}</Text>
+              <TouchableOpacity style={styles.button2} onPress={() => handleSelectPrato(item)}>
+                <Text>Selecionar</Text>
+              </TouchableOpacity>
 
-        </View>
+            </View>
+          )}
+        />
+        <TouchableOpacity onPress={handleFinalizarPedido} style={styles.button2}>
+          <Text>Finalizar Pedido</Text>
+        </TouchableOpacity>
+
 
       </View>
-    </ScrollView>
-  );
+
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -280,5 +319,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 40,
     borderWidth: 1
+  },
+  camera: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    margin: 64,
   },
 });

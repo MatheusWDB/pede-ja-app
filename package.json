@@ -17,6 +17,7 @@
     "@react-navigation/native-stack": "^6.9.26",
     "axios": "^1.6.8",
     "expo": "^51.0.1",
+    "expo-camera": "~15.0.9",
     "expo-file-system": "~17.0.1",
     "expo-font": "~12.0.5",
     "expo-image-manipulator": "~12.0.5",
@@ -30,21 +31,19 @@
     "react-native-image-picker": "^5.3.1",
     "react-native-masked-text": "^1.13.0",
     "react-native-modalize": "^2.1.1",
+    "react-native-permissions": "^4.1.5",
     "react-native-qrcode-svg": "^6.3.1",
     "react-native-safe-area-context": "4.10.1",
-    "react-native-scan-barcode": "^3.1.7",
     "react-native-screens": "3.31.1",
     "react-native-vector-icons": "^10.1.0",
-    "yup": "^1.4.0",
-    "expo-camera": "~15.0.9",
-    "expo-barcode-scanner": "~13.0.1"
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0"
   },
   "private": true,
   "resolutions": {
-    "react-native-permissions": "^3.6.1"
+    "react-native-permissions": "^3.8.0"
   },
   "overrides": {
     "react-native-qrcode-scanner": {
