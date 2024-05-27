@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TextInput, ScrollView, Button, Alert, TouchableOpacity, ActivityIndicator,Platform } from "react-native";
+import { View, Text, StyleSheet, Image, TextInput, ScrollView, Button, Alert, TouchableOpacity, ActivityIndicator, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { TextInputMask } from "react-native-masked-text";
 import axios from "axios";
@@ -21,29 +21,30 @@ export default function Cadastro() {
     for (let propriedade in registro) {
       if (registro.hasOwnProperty(propriedade)) {
         if (registro[propriedade] === null || registro[propriedade] === '') {
-          Alert.alert(`O campo ${propriedade} é obrigatório.`); 
-        } else { 
-          if (registro.email === confirm.email && registro.senha === confirm.senha) {
-            await axios.post('https://pede-ja.onrender.com/cadastro', registro).then(function (resposta) {
-                console.log(resposta.data);
-                navigation.navigate('Login')
-            }).catch(function (erro) {
-                console.log(erro);
-            });
-            
-            setRegistro({nome: '', email: '', senha: '', cnpj: '', telefone: ''})
-            setConfirm({email: '', senha: ''})
-    
+          Alert.alert(`O campo ${propriedade} é obrigatório.`);
+          return
+        }
+        if (registro.email === confirm.email && registro.senha === confirm.senha) {
+          await axios.post('https://pede-ja.onrender.com/cadastro', registro).then(function (resposta) {
+            console.log(resposta.data);
+            navigation.navigate('Login')
+          }).catch(function (erro) {
+            console.log(erro);
+          });
+
+          setRegistro({ nome: '', email: '', senha: '', cnpj: '', telefone: '' })
+          setConfirm({ email: '', senha: '' })
+
         } else if (registro.email !== confirm.email) {
-            Alert.alert('Emails não correspondem')
+          Alert.alert('Emails não correspondem')
         } else {
-            Alert.alert('Senhas não correspondem')
+          Alert.alert('Senhas não correspondem')
         }
-        }
+
       }
     }
-    
-    
+
+
     //Fim if
     Carregando(false);
   };
@@ -51,11 +52,11 @@ export default function Cadastro() {
   return (
     <ScrollView style={{ backgroundColor: "#fff" }}>
       <View style={styles.container}>
-      <View style={styles.containerLogo}>
-        <Text style={{ color: "#FFFFFF", fontSize: 36 }}>PEDE</Text>
-        <Image source={require('../../assets/imagens/burger.png')} />
-        <Text style={{ color: "#fff", fontSize: 36 }}>JÁ</Text>
-      </View>
+        <View style={styles.containerLogo}>
+          <Text style={{ color: "#FFFFFF", fontSize: 36 }}>PEDE</Text>
+          <Image source={require('../../assets/imagens/burger.png')} />
+          <Text style={{ color: "#fff", fontSize: 36 }}>JÁ</Text>
+        </View>
         <View style={styles.containerForm}>
           <Text style={styles.heading}>Cadastro</Text>
           <View style={styles.inputContainer}>
@@ -79,7 +80,7 @@ export default function Cadastro() {
           </View>
 
           <View style={styles.inputContainer}>
-          <Image source={require("../../assets/imagens/Letter.png")} style={styles.icon} />
+            <Image source={require("../../assets/imagens/Letter.png")} style={styles.icon} />
             <TextInput
               placeholder="Confirme o Email"
               onChangeText={(text) => setConfirm({ ...confirm, email: text })}
@@ -107,24 +108,24 @@ export default function Cadastro() {
             />
           </View>
           <View style={styles.inputContainer}>
-          <Image source={require("../../assets/imagens/Lock.png")} style={styles.icon} />
+            <Image source={require("../../assets/imagens/Lock.png")} style={styles.icon} />
             <TextInput
               placeholder="Confirme a Senha"
               onChangeText={(text) => setConfirm({ ...confirm, senha: text })}
-              
+
               style={styles.input}
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Image source={require('../../assets/imagens/Phone.png')} style={styles.icon}/>
-            <TextInputMask 
+            <Image source={require('../../assets/imagens/Phone.png')} style={styles.icon} />
+            <TextInputMask
               style={styles.input}
               placeholder="telefone"
               onChangeText={(text) => setRegistro({ ...registro, telefone: text })}
               type="cel-phone"
               options={{
-                maskType:"BRL",
+                maskType: "BRL",
                 withDDD: true,
                 dddMask: '(99) '
               }}
@@ -145,28 +146,28 @@ const styles = StyleSheet.create({
     backgroundColor: "#EA8841",
     ...Platform.select({
       android: {
-        
-        
+
+
       }
     })
   },
   containerLogo: {
-    
-    
+
+
     flexDirection: "row",
-    width:'100%',
-    marginTop:'7%',
+    width: '100%',
+    marginTop: '7%',
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: '#EA8841',
-    marginBottom:'7%',
-    
+    marginBottom: '7%',
+
     ...Platform.select({
       android: {
         width: "100%",
         marginTop: "15%",
         marginBottom: "0%",
-        
+
       }
     })
   },
@@ -175,13 +176,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    
+
     ...Platform.select({
       android: {
         paddingStart: "5%",
         paddingEnd: "5%",
         marginTop: "15%"
-        
+
       }
     })
   },
@@ -192,7 +193,7 @@ const styles = StyleSheet.create({
     marginTop: "5%",
     ...Platform.select({
       android: {
-        
+
         marginTop: "10%"
       }
     })
@@ -201,37 +202,37 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderBottomWidth: 1,
     width: "30%",
-    alignSelf:"center",
+    alignSelf: "center",
     marginTop: "1%",
-    
+
 
     ...Platform.select({
       android: {
         width: "80%",
-    marginLeft: "7%",
-    marginTop: "10%",
-    height:50,
-        
+        marginLeft: "7%",
+        marginTop: "10%",
+        height: 50,
+
       }
     })
   },
   input: {
     marginLeft: "4%",
-    height:50,
-    
-    width:'90%'
+    height: 50,
+
+    width: '90%'
   },
   icon: {
-    height:26,
-    width:25,
-    marginTop:'2%',
+    height: 26,
+    width: 25,
+    marginTop: '2%',
     ...Platform.select({
       android: {
-        
-        height:"60%",
-        width:'10%',
-        marginTop:"3%",
-        
+
+        height: "60%",
+        width: '10%',
+        marginTop: "3%",
+
       }
     })
   },
@@ -242,9 +243,9 @@ const styles = StyleSheet.create({
     width: "20%",
     marginTop: "2%",
     paddingVertical: 8,
-    marginBottom:"1%",
+    marginBottom: "1%",
     alignSelf: "center",
-    
+
     alignItems: "center",
     justifyContent: "center",
     ...Platform.select({

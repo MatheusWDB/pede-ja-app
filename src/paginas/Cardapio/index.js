@@ -164,10 +164,6 @@ export default function Cardapio({ route }) {
     return <ActivityIndicator size="large" color="#0000ff" />
   }
 
-  const handleShowQR = () => {
-    setVisualizarQRCode(true);
-  };
-
   const cancelarPrato = () => {
     setAdicionar(false)
     setNewPrato({ nome: '', valor: '', ingredientes: [], imagem: null })
@@ -393,10 +389,11 @@ export default function Cardapio({ route }) {
         <TouchableOpacity onPress={adicionarPrato} style={styles.buttonFim}>
           <Text style={{ color: '#fff' }}>Adicionar Prato</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleShowQR} style={styles.buttonFim}>
+        <TouchableOpacity onPress={() => setVisualizarQRCode(true)} style={styles.buttonFim}>
           <Text style={{ color: '#fff' }}>Mostrar QRcode</Text>
         </TouchableOpacity>
       </View>
+      
     </View>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -15,12 +15,14 @@ import {
 } from "react-native";
 
 export default function Pedidos({ route }) {
+  const navigation = useNavigation();
   const [data, setData] = useState([]);
   const [visibleModal, setVisibleModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const { idR } = route.params;
-  const [pedidoDeletado, setPedidoDeletado] = useState(false);
+  const [atualizarPedidos, setAtualizarPedidos] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [menu, setMenu] = useState(false)
 
   if (isLoading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
@@ -39,9 +41,9 @@ export default function Pedidos({ route }) {
   useEffect(() => {
     setIsLoading(true);
     listarPedidos();
-    setPedidoDeletado(false);
+    setAtualizarPedidos(false);
     setIsLoading(false);
-  }, [pedidoDeletado]);
+  }, [atualizarPedidos]);
 
   const handleSelect = (pedido) => {
     setIsLoading(true);
@@ -55,12 +57,13 @@ export default function Pedidos({ route }) {
     await axios.put(`https://pede-ja.onrender.com/${idR}/pedidos/${idP}`)
       .then(() => {
         setSelectedItem(null);
-        setPedidoDeletado(true);
+        setAtualizarPedidos(true);
         setVisibleModal(false)
       })
       .catch((error) => {
         console.error(error);
       });
+
   };
 
   const handleDeleteOrder = async () => {
@@ -69,7 +72,7 @@ export default function Pedidos({ route }) {
       .then(() => {
         setSelectedItem(null);
         setVisibleModal(false);
-        setPedidoDeletado(true);
+        setAtualizarPedidos(true);
       })
       .catch((error) => {
         console.error("Erro ao excluir pedido:", error);
@@ -83,18 +86,78 @@ export default function Pedidos({ route }) {
         <Text style={{ color: "#FFFFFF", fontSize: 36 }}>PEDE</Text>
         <Image source={require('../../assets/imagens/burger.png')} />
         <Text style={{ color: "#fff", fontSize: 36 }}>JÁ</Text>
+
+        <TouchableOpacity >
+          <Text style={{
+            fontSize: 24, color: '#ffffff', left: "1000%", ...Platform.select({
+              android: {
+                fontSize: 24,
+                left: '300%'
+              }
+            })
+          }} onPress={() => setMenu(true)}
+          >☰</Text>
+        </TouchableOpacity>
       </View>
 
+      <Modal visible={menu}
+        transparent={true}
+        onRequestClose={() => setMenu(false)}
+      >
+
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <View style={{ backgroundColor: 'white', padding: 20, width: '80%', borderRadius: 25 }}>
+
+
+            <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate('Cardapio', { idR: idR }), setMenu(false) }}>
+              <Text style={{ color: '#fff' }}>Cardapio</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
+              <Text style={{ color: '#fff' }}>Sair da conta</Text>
+            </TouchableOpacity>
+
+
+            <TouchableOpacity onPress={() => {
+              setMenu(!menu);
+            }} style={styles.button}>
+              <Text style={{ color: '#fff' }}>Fechar</Text>
+            </TouchableOpacity>
+
+          </View>
+        </View>
+
+      </Modal>
+
       <View style={styles.containerForm}>
-        <View style={{ height: '97%',  }}>
+        <View style={{ height: '97%', }}>
+          <View style={{ alignItems: "flex-end", marginTop: 10, marginHorizontal: '25%', ...Platform.select({ android: { marginHorizontal: 15, } }) }}>
+            <TouchableOpacity
+              onPress={() => setAtualizarPedidos(true)}
+              style={{ backgroundColor: "#EA8841", borderRadius: 10, width: 100, height: 25 }}>
+              <Text style={{ color: 'white', textAlign: "center" }}>Atualizar</Text>
+            </TouchableOpacity>
+          </View>
+
           <FlatList
             data={data}
             keyExtractor={(item) => item.idPedido.toString()}
             renderItem={({ item }) => (
               <TouchableOpacity onPress={() => handleSelect(item)}>
                 <ScrollView style={styles.flatList}>
-                  <Text style={{ alignSelf: 'center', fontWeight: "bold", color: "#EA8841" }}>{`Pedido: n° ${item.numeroPedido}`}</Text>
-                  <Text>{item.pratos.nome}</Text>
+                  <View style={{ flexDirection: "row" }}>
+
+                    <View style={{ flex: 1, justifyContent: "center" }}>
+                      <Text style={{ alignSelf: 'center', fontWeight: "bold", color: "#EA8841" }}>{`Pedido: n° ${item.numeroPedido}`}</Text>
+                    </View>
+
+                    <View style={{ flex: 1, justifyContent: "center" }}>
+                      <Text style={{ alignSelf: 'center', fontWeight: "bold", color: "#EA8841" }}>{`Finalizado: ${item.finalizado}`}</Text>
+                    </View>
+                  </View>
+
+
+
                   <View style={{ flexDirection: "row", marginBottom: 5 }}>
                     <View style={{ flex: 1 }}>
                       <Text style={{ fontWeight: "bold", color: "#EA8841" }}>Nome:</Text>
@@ -138,17 +201,20 @@ export default function Pedidos({ route }) {
         style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
         visible={visibleModal}
       >
-        <View style={{ flex: 1  }}>
+        <View style={{ flex: 1 }}>
           {selectedItem && (
 
-            <View style={{ flex: 1, borderWidth: 1, backgroundColor: 'white', padding: 20, borderRadius: 5,  }}>
+            <View style={{ flex: 1, borderWidth: 1, backgroundColor: 'white', padding: 20, borderRadius: 5, }}>
 
-              <View style={{ flexDirection: "row", marginBottom: 0, height: 55, borderWidth: 1, width:'70%', alignSelf:"center", ...Platform.select({
-      android: {
-        height: 55,
-        marginBottom: 0
-      }
-    }) }}> 
+              <View style={{
+                flexDirection: "row", marginBottom: 0, height: 55, borderWidth: 1, width: '70%', alignSelf: "center", ...Platform.select({
+                  android: {
+                    height: 55,
+                    marginBottom: 0,
+                    width: '95%'
+                  }
+                })
+              }}>
                 <View style={{ flex: 1, alignItems: "center" }}>
                   <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Cliente: ${selectedItem.cliente}`}</Text>
                 </View>
@@ -160,12 +226,15 @@ export default function Pedidos({ route }) {
                 </View>
               </View>
 
-              <View style={{ flexDirection: "row", borderWidth: 0, marginBottom: 0, padding: 5, width:"70%", alignSelf:"center", ...Platform.select({
-      android: {
-        padding: 5,
-        marginBottom: 0
-      }
-    })}}>
+              <View style={{
+                flexDirection: "row", borderWidth: 0, marginBottom: 0, padding: 5, width: "70%", alignSelf: "center", ...Platform.select({
+                  android: {
+                    padding: 5,
+                    marginBottom: 0,
+                    width: '95%'
+                  }
+                })
+              }}>
                 <View style={{ flex: 1, alignItems: "center" }}>
                   <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Pedido n°: ${selectedItem.numeroPedido}`}</Text>
                 </View>
@@ -174,12 +243,15 @@ export default function Pedidos({ route }) {
                 </View>
               </View>
 
-              <View style={{ flexDirection: "row", marginBottom: 10, borderWidth: 0, padding: 3.6, width:'70%',  alignSelf:"center", ...Platform.select({
-      android: {
-        marginBottom: 10,
-        padding: 3.6
-      }
-    })}}>
+              <View style={{
+                flexDirection: "row", marginBottom: 10, borderWidth: 0, padding: 3.6, width: '70%', alignSelf: "center", ...Platform.select({
+                  android: {
+                    marginBottom: 10,
+                    padding: 3.6,
+                    width: '95%'
+                  }
+                })
+              }}>
                 <View style={{ flex: 1, alignItems: "center" }}>
                   <Text style={{ fontWeight: "bold", color: "#EA8841" }}>Nome:</Text>
                 </View>
@@ -194,7 +266,15 @@ export default function Pedidos({ route }) {
                 </View>
               </View>
 
-              <View style={{ flex: 2, borderWidth: 1, width:"70%", alignSelf:"center"}}>
+              <View style={{
+                flex: 2, borderWidth: 1, width: "70%", alignSelf: "center", ...Platform.select({
+                  android: {
+                    marginBottom: 10,
+                    padding: 3.6,
+                    width: '95%'
+                  }
+                })
+              }}>
                 <ScrollView>
                   {selectedItem.pratos.map((prato, index) => (
                     <View key={index} style={{ flexDirection: "row", borderBottomWidth: 1, width: '100%', marginBottom: 5, alignItems: "center" }}>
@@ -216,7 +296,7 @@ export default function Pedidos({ route }) {
               </View>
 
               <View style={{ flex: 1 }}>
-                <Text style={{ fontWeight: "bold", color: "#EA8841", marginTop: 10, marginLeft:"15%"}}>{`Valor Total: ${selectedItem.valorTotal}`}</Text>
+                <Text style={{ fontWeight: "bold", color: "#EA8841", marginTop: 10, marginLeft: "15%" }}>{`Valor Total: ${selectedItem.valorTotal}`}</Text>
 
                 <TouchableOpacity style={styles.button} onPress={handleOrderDone}>
                   <Text>Pedido feito</Text>
@@ -282,7 +362,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "15%",
     paddingVertical: 8,
-    marginTop:'1%',
+    marginTop: '1%',
     ...Platform.select({
       android: {
         marginTop: 15,
@@ -298,7 +378,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginTop: '3%',
     width: '40%',
-    paddingHorizontal:'2%',
+    paddingHorizontal: '2%',
     ...Platform.select({
       android: {
         padding: 10,
