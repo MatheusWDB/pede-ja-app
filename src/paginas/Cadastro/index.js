@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TextInput, ScrollView, Button, Alert, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, Image, TextInput, ScrollView, Button, Alert, TouchableOpacity, ActivityIndicator,Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { TextInputMask } from "react-native-masked-text";
 import axios from "axios";
@@ -24,7 +24,7 @@ export default function Cadastro() {
           Alert.alert(`O campo ${propriedade} é obrigatório.`); 
         } else { 
           if (registro.email === confirm.email && registro.senha === confirm.senha) {
-            await axios.post('http://192.168.0.8:3000/cadastro', registro).then(function (resposta) {
+            await axios.post('https://pede-ja.onrender.com/cadastro', registro).then(function (resposta) {
                 console.log(resposta.data);
                 navigation.navigate('Login')
             }).catch(function (erro) {
@@ -51,6 +51,11 @@ export default function Cadastro() {
   return (
     <ScrollView style={{ backgroundColor: "#fff" }}>
       <View style={styles.container}>
+      <View style={styles.containerLogo}>
+        <Text style={{ color: "#FFFFFF", fontSize: 36 }}>PEDE</Text>
+        <Image source={require('../../assets/imagens/burger.png')} />
+        <Text style={{ color: "#fff", fontSize: 36 }}>JÁ</Text>
+      </View>
         <View style={styles.containerForm}>
           <Text style={styles.heading}>Cadastro</Text>
           <View style={styles.inputContainer}>
@@ -138,29 +143,77 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#EA8841",
+    ...Platform.select({
+      android: {
+        
+        
+      }
+    })
+  },
+  containerLogo: {
+    
+    
+    flexDirection: "row",
+    width:'100%',
+    marginTop:'7%',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: '#EA8841',
+    marginBottom:'7%',
+    
+    ...Platform.select({
+      android: {
+        width: "100%",
+        marginTop: "15%",
+        marginBottom: "0%",
+        
+      }
+    })
   },
   containerForm: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#ffffff',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    paddingStart: "5%",
-    paddingEnd: "5%",
-    marginTop: "15%",
+    
+    ...Platform.select({
+      android: {
+        paddingStart: "5%",
+        paddingEnd: "5%",
+        marginTop: "15%"
+        
+      }
+    })
   },
   heading: {
     color: "#EA8841",
     fontSize: 40,
     textAlign: "center",
-    marginTop: "10%",
+    marginTop: "5%",
+    ...Platform.select({
+      android: {
+        
+        marginTop: "10%"
+      }
+    })
   },
   inputContainer: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    width: "85%",
+    width: "30%",
+    alignSelf:"center",
+    marginTop: "1%",
+    
+
+    ...Platform.select({
+      android: {
+        width: "80%",
     marginLeft: "7%",
     marginTop: "10%",
-    height:50
+    height:50,
+        
+      }
+    })
   },
   input: {
     marginLeft: "4%",
@@ -169,20 +222,38 @@ const styles = StyleSheet.create({
     width:'90%'
   },
   icon: {
-    height:"60%",
-    width:'10%',
-    marginTop:"3%"
+    height:26,
+    width:25,
+    marginTop:'2%',
+    ...Platform.select({
+      android: {
+        
+        height:"60%",
+        width:'10%',
+        marginTop:"3%",
+        
+      }
+    })
   },
   button: {
 
     backgroundColor: "#EA8841",
     borderRadius: 50,
+    width: "20%",
+    marginTop: "2%",
     paddingVertical: 8,
-    width: "60%",
+    marginBottom:"1%",
     alignSelf: "center",
-    marginTop: "11%",
+    
     alignItems: "center",
     justifyContent: "center",
+    ...Platform.select({
+      android: {
+        width: "60%",
+        marginTop: "9%",
+        paddingVertical: 8,
+      }
+    })
 
 
   },

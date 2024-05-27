@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, ActivityIndicator, StyleSheet, ScrollView, Button, Modal, TextInput, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Image, ActivityIndicator, StyleSheet, ScrollView, Button, Modal, TextInput, Alert, TouchableOpacity, Platform } from 'react-native';
 import axios from 'axios';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { TextInputMask, TextMask } from 'react-native-masked-text';
@@ -21,6 +21,22 @@ export default function Cliente() {
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [valorFinal, setValorFinal] = useState(0);
+
+  if (!permission) {
+    // Camera permissions are still loading.
+    return <View />;
+  }
+
+  if (!permission.granted) {
+    // Camera permissions are not granted yet.
+    return (
+      <View style={styles.container}>
+        <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
+        <Button onPress={requestPermission} title="grant permission" />
+      </View>
+    );
+  }
+
 
   const incrementarQuantidade = (index) => {
     const novosPedidos = [...pedidos];
@@ -51,20 +67,7 @@ export default function Cliente() {
     }
   };
 
-  if (!permission) {
-    // Camera permissions are still loading.
-    return <View />;
-  }
 
-  if (!permission.granted) {
-    // Camera permissions are not granted yet.
-    return (
-      <View style={styles.container}>
-        <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
-        <Button onPress={requestPermission} title="grant permission" />
-      </View>
-    );
-  }
 
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
@@ -76,7 +79,7 @@ export default function Cliente() {
 
   const fetchPratos = async () => {
     setCarregando(true);
-    await axios.get(`http://192.168.0.8:3000/${idR}/cardapio`)
+    await axios.get(`https://pede-ja.onrender.com/${idR}/cardapio`)
       .then(function (resposta) {
         setPratos(resposta.data)
       })
@@ -144,7 +147,7 @@ export default function Cliente() {
       }
     });
     console.log(novoPedido)
-    await axios.post(`http://192.168.0.8:3000/${idR}/cliente/realizar_pedido`, novoPedido)
+    await axios.post(`https://pede-ja.onrender.com/${idR}/cliente/realizar_pedido`, novoPedido)
       .then(function (resposta) {
         setPedidoVisible(false); // Fecha o modal de finalizar pedido
         setPedidos([cliente]); // Limpa a lista de pedidos
@@ -194,13 +197,13 @@ export default function Cliente() {
           <TextInput
             placeholder="Nome"
             value={cliente.nome}
-            onChangeText={(text) => setCliente({...cliente,  nome: text })}
+            onChangeText={(text) => setCliente({ ...cliente, nome: text })}
             style={{ borderWidth: 1, width: 200, textAlign: 'center' }}
           />
           <TextInputMask
             placeholder="Telefone"
             value={cliente.telefone}
-            onChangeText={(text) => setCliente( {...cliente, telefone: text })}
+            onChangeText={(text) => setCliente({ ...cliente, telefone: text })}
             type="cel-phone"
             keyboardType='phone-pad'
             options={{
@@ -214,7 +217,7 @@ export default function Cliente() {
             placeholder="Mesa"
             value={cliente.mesa}
             keyboardType='number-pad'
-            onChangeText={(text) => setCliente( {...cliente, mesa: text })}
+            onChangeText={(text) => setCliente({ ...cliente, mesa: text })}
             style={{ borderWidth: 1, width: 200, textAlign: 'center' }}
           />
           <TouchableOpacity style={styles.button} onPress={handleFormSubmit}>
@@ -227,13 +230,16 @@ export default function Cliente() {
 
         <View style={{ flex: 1 }}>
           {selectedPrato && (
-            <View>
-              <View style={{ width: 150, height: 150, backgroundColor: 'gray', borderRadius: 15, justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }}>
+            <View style={{ alignItems: 'center' }}>
+              <View style={{ width: 150, height: 150, borderRadius: 15, justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }}>
                 {selectedPrato.imagem ?
                   <Image
                     style={{ width: 150, height: 150, borderRadius: 15, alignSelf: 'center' }}
                     source={{ uri: `data:image/jpeg;base64,${selectedPrato.imagem}` }}
-                  /> : null
+                  /> : <Image
+                    style={{ width: 150, height: 150, borderRadius: 15, alignSelf: 'center' }}
+                    source={require('../../assets/imagens/Imagenull.jpeg')}
+                  />
                 }
               </View>
 
@@ -241,6 +247,7 @@ export default function Cliente() {
                 <Text style={styles.textInput}>Nome:</Text>
                 <Text style={styles.input}>{selectedPrato.nome}</Text>
               </View>
+
 
               <View style={styles.selecionar}>
                 <Text style={styles.textInput}>Ingredientes:</Text>
@@ -255,8 +262,22 @@ export default function Cliente() {
                   {selectedPrato.valor.replace('.', ',').toString()}
                 </Text>
               </View>
-              <View style={{ flexDirection: 'row', alignSelf: 'center', alignItems: 'center', justifyContent: 'center' }}>
 
+              <View style={{ flexDirection: 'row', alignSelf: 'center', alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={styles.textInput}>Observações:</Text>
+                <TextInput
+                  style={styles.inputObs}
+                  value={observacao}
+                  placeholder='Observações'
+                  onChangeText={(text) => setObservacao(text)}
+                />
+              </View>
+
+              <View style={{ flexDirection: 'row', alignSelf: 'center', alignItems: 'center', justifyContent: 'center', marginTop: 10, }}>
+
+                <Text style={styles.textInput}>
+                  Qtd:
+                </Text>
 
                 <TouchableOpacity onPress={() => setQuantidade(Math.max(1, quantidade - 1))} style={styles.buttonAdd}>
                   <Text style={{ fontSize: 20, color: 'white' }}>-</Text>
@@ -267,13 +288,16 @@ export default function Cliente() {
                 <TouchableOpacity onPress={() => setQuantidade(quantidade + 1)} style={styles.buttonAdd}>
                   <Text style={{ fontSize: 20, color: 'white' }}>+</Text>
                 </TouchableOpacity>
+
               </View>
+
+
             </View>
 
           )}
         </View>
 
-        <TouchableOpacity onPress={handleAddPedido} style={styles.button}>
+        <TouchableOpacity onPress={handleAddPedido} style={styles.button2}>
           <Text style={{ color: 'white' }}>Adicionar ao Pedido</Text>
         </TouchableOpacity>
 
@@ -284,7 +308,14 @@ export default function Cliente() {
 
       <Modal visible={pedidoVisible} animationType="slide">
 
-        <View style={{ flex: 1, justifyContent: 'center', }}>
+        <View style={{
+          flex: 1, justifyContent: 'center', width: "50%", alignSelf: "center", ...Platform.select({
+            android: {
+
+              width: '100%'
+            }
+          })
+        }}>
 
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ fontWeight: 'bold', color: '#EA8841', fontSize: 20, alignSelf: 'center', }}>Seu Pedido</Text>
@@ -382,12 +413,14 @@ export default function Cliente() {
 
                 <View style={styles.info}>
                   <View style={{ width: 90, height: 90, backgroundColor: 'gray', borderRadius: 15 }}>
-
                     {item.imagem ?
                       <Image
                         style={{ width: 90, height: 90, borderRadius: 15 }}
                         source={{ uri: `data:image/jpeg;base64,${item.imagem}` }}
-                      /> : null
+                      /> : <Image
+                        style={{ width: 90, height: 90, borderRadius: 15 }}
+                        source={require('../../assets/imagens/Imagenull.jpeg')}
+                      />
                     }
                   </View>
                   <View style={styles.infoTexto}>
@@ -402,9 +435,12 @@ export default function Cliente() {
         />
       </View>
 
-      <TouchableOpacity onPress={handleFinalizarPedido} style={styles.button2}>
-        <Text>Finalizar Pedido</Text>
-      </TouchableOpacity>
+      <View style={{ backgroundColor: 'white' }}>
+
+        <TouchableOpacity onPress={handleFinalizarPedido} style={styles.button2}>
+          <Text>Finalizar Pedido</Text>
+        </TouchableOpacity>
+      </View>
 
     </View>
   )
@@ -416,13 +452,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#EA8841",
   },
   containerLogo: {
-    marginTop: "7%",
-    backgroundColor: '#EA8841',
     flexDirection: "row",
-    width: "100%",
+    width: '100%',
+    marginTop: '4%',
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: '#EA8841',
+    marginBottom: '4%',
+
+    ...Platform.select({
+      android: {
+        width: "100%",
+        marginTop: "15%",
+        marginBottom: "0%",
+
+      }
+    })
   },
+
   containerForm: {
     flex: 1,
     backgroundColor: "#fff",
@@ -438,31 +485,53 @@ const styles = StyleSheet.create({
     backgroundColor: "#EA8841",
     borderRadius: 50,
     paddingVertical: 8,
-    width: "60%",
+    width: "10%",
     alignSelf: "center",
     alignItems: "center",
-    marginTop: '10%'
+    marginTop: '10%',
+    ...Platform.select({
+      android: {
+        paddingVertical: 8,
+        width: "60%",
+        marginTop: '10%',
+      }
+    })
   },
   button2: {
     backgroundColor: "#EA8841",
     borderRadius: 50,
     paddingVertical: 8,
-    width: "60%",
+    width: "20%",
     alignSelf: "center",
-    marginTop: "5%",
+    marginTop: "1%",
     alignItems: "center",
     justifyContent: "center",
-    bottom: 10
+    bottom: 10,
+    ...Platform.select({
+      android: {
+        bottom: 10,
+        marginTop: "5%",
+        paddingVertical: 8,
+        width: "60%",
+      }
+    })
   },
   pratoItem: {
     marginVertical: 15,
     padding: 5,
-    width: '95%',
+    width: '50%',
     alignSelf: 'center',
     borderRadius: 20,
     borderWidth: 1,
     flexDirection: 'row',
     flex: 1,
+    ...Platform.select({
+      android: {
+        width: '95%',
+        marginVertical: 15,
+        padding: 5,
+      }
+    })
   },
   info: {
     flexDirection: 'row',
@@ -498,10 +567,18 @@ const styles = StyleSheet.create({
   selecionar: {
     borderWidth: 0,
     flexDirection: 'row',
-    alignItems: 'center',
+
+    alignSelf: "center",
     marginVertical: 10,
     height: 35,
-    justifyContent: 'flex-end'
+    justifyContent: 'center2',
+    ...Platform.select({
+      android: {
+        marginVertical: 10,
+        height: 35,
+        justifyContent: 'flex-end',
+      }
+    })
   },
   input: {
     borderWidth: 0,
@@ -518,6 +595,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     alignItems: 'center',
-    justifyContent: 'center'
-  }
+    justifyContent: 'center',
+    marginLeft: 5
+  },
+  inputObs: {
+    borderWidth: 1,
+    marginLeft: 5,
+    width: 200,
+  },
 });

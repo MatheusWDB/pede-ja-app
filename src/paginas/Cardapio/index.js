@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, ActivityIndicator, StyleSheet, ScrollView, Button, Modal, TextInput, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Image, ActivityIndicator, StyleSheet, ScrollView, Button, Modal, TextInput, Alert, TouchableOpacity, Platform } from 'react-native';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
@@ -21,7 +21,7 @@ export default function Cardapio({ route }) {
   const [menu, setMenu] = useState(false);
 
   const listarCaradapio = async () => {
-    await axios.get(`http://192.168.0.8:3000/${idR}/cardapio`)
+    await axios.get(`https://pede-ja.onrender.com/${idR}/cardapio`)
       .then(function (resposta) {
         setData(resposta.data);
       })
@@ -38,7 +38,7 @@ export default function Cardapio({ route }) {
 
   const criarPrato = async () => {
     Carregando(true);
-    await axios.post(`http://192.168.0.8:3000/${idR}/cardapio`, newPrato)
+    await axios.post(`https://pede-ja.onrender.com/${idR}/cardapio`, newPrato)
       .then(function (resposta) {
       })
       .catch(function (erro) {
@@ -75,7 +75,7 @@ export default function Cardapio({ route }) {
       const manipResult = await ImageManipulator.manipulateAsync(
         result.assets[0].uri,
         [{ resize: { width: 800, height: 600 } }],
-        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+        { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
       );
 
       const base64 = await FileSystem.readAsStringAsync(manipResult.uri, {
@@ -99,7 +99,7 @@ export default function Cardapio({ route }) {
       const manipResult = await ImageManipulator.manipulateAsync(
         result.assets[0].uri,
         [{ resize: { width: 800, height: 600 } }],
-        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+        { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
       );
 
       const base64 = await FileSystem.readAsStringAsync(manipResult.uri, {
@@ -128,7 +128,7 @@ export default function Cardapio({ route }) {
 
     const idPr = parseInt(selectedPrato.idPrato, 10);
 
-    await axios.put(`http://192.168.0.8:3000/${idR}/cardapio/${idPr}`, selectedPrato)
+    await axios.put(`https://pede-ja.onrender.com/${idR}/cardapio/${idPr}`, selectedPrato)
       .then(function (resposta) {
       })
       .catch(function (erro) {
@@ -146,7 +146,7 @@ export default function Cardapio({ route }) {
 
     const idPr = parseInt(selectedPrato.idPrato, 10);
 
-    await axios.delete(`http://192.168.0.8:3000/${idR}/cardapio/${idPr}`)
+    await axios.delete(`https://pede-ja.onrender.com/${idR}/cardapio/${idPr}`)
       .then(function (resposta) {
 
       })
@@ -183,7 +183,12 @@ export default function Cardapio({ route }) {
         />
         <Text style={{ color: "#fff", fontSize: 36 }}>JÁ</Text>
         <TouchableOpacity >
-          <Text style={{ fontSize: 24, color: '#ffffff', left: '300%' }} onPress={() => setMenu(true)}
+          <Text style={{ fontSize: 24, color: '#ffffff', left:"1000%", ...Platform.select({
+      android: {
+        fontSize: 24,
+        left: '300%'
+      }
+    }) }} onPress={() => setMenu(true)}
           >☰</Text>
         </TouchableOpacity>
 
@@ -199,7 +204,7 @@ export default function Cardapio({ route }) {
           <View style={{ backgroundColor: 'white', padding: 20, width: '80%', borderRadius: 25 }}>
 
 
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Pedidos', { idR: idR })}>
+            <TouchableOpacity style={styles.button} onPress={() => {navigation.navigate('Pedidos', { idR: idR }), setMenu(false)}}>
               <Text style={{ color: '#fff' }}>Ver pedidos</Text>
             </TouchableOpacity>
 
@@ -234,7 +239,10 @@ export default function Cardapio({ route }) {
                       <Image
                         style={{ width: 90, height: 90, borderRadius: 15 }}
                         source={{ uri: `data:image/jpeg;base64,${item.imagem}` }}
-                      /> : null
+                      /> : <Image
+                      style={{ width: 90, height: 90, borderRadius: 15 }}
+                      source={require('../../assets/imagens/Imagenull.jpeg')}
+                    />
                     }
                   </View>
                   <View style={styles.infoTexto}>
@@ -256,12 +264,15 @@ export default function Cardapio({ route }) {
         <View style={{ flex: 1 }}>
           {selectedPrato && (
             <View>
-              <View style={{ width: 150, height: 150, backgroundColor: 'gray', borderRadius: 15, justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }}>
+              <View style={{ width: 150, height: 150, borderRadius: 15, justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }}>
                 {selectedPrato.imagem ?
                   <Image
                     style={{ width: 150, height: 150, borderRadius: 15, alignSelf: 'center' }}
                     source={{ uri: `data:image/jpeg;base64,${selectedPrato.imagem}` }}
-                  /> : null
+                  /> : <Image
+                  style={{ width: 150, height: 150, borderRadius: 15 }}
+                  source={require('../../assets/imagens/Imagenull.jpeg')}
+                />
                 }
               </View>
 
@@ -307,31 +318,39 @@ export default function Cardapio({ route }) {
 
       <Modal visible={adicionar} animationType="slide">
         <View style={styles.modalView}>
-          <View style={{ width: 90, height: 90, backgroundColor: 'gray', borderRadius: 15 }}>
+          <View style={{ width: 150, height: 150, borderRadius: 15, alignSelf: 'center' }}>
             {newPrato.imagem ?
               <Image
                 style={{ width: 150, height: 150, borderRadius: 15, alignSelf: 'center' }}
                 source={{ uri: `data:image/jpeg;base64,${newPrato.imagem}` }}
-              /> : null
+              /> : <Image
+              style={{ width: 150, height: 150, borderRadius: 15 }}
+              source={require('../../assets/imagens/Imagenull.jpeg')}
+            />
             }
           </View>
+          <View style={{width:"30%" ,alignContent:'center', justifyContent:"center", alignSelf:"center", marginTop:"3%", marginBottom:'3%'}}>
 
+          
           <TextInput
+          style={{textAlign:"center"}}
             placeholder="Nome"
             onChangeText={(text) => setNewPrato({ ...newPrato, nome: text })}
           />
 
           <TextInput
+          style={{textAlign:"center"}}
             placeholder="Valor"
             keyboardType="numeric"
             onChangeText={(text) => setNewPrato({ ...newPrato, valor: text.replace(',', '.') })}
           />
 
           <TextInput
+          style={{textAlign:"center"}}
             placeholder="Ingredientes"
-            onChangeText={(text) => setNewPrato({ ...newPrato, ingredientes: text.split(', ') })}
+            onChangeText={(text) => setNewPrato({ ...newPrato, ingredientes: text.split(',').map(item => item.trim().toLowerCase()) })}
           />
-
+</View>
           <TouchableOpacity onPress={escolherImagem} style={styles.button}>
             <Text style={{ color: '#fff' }}>Escolher a imagem</Text>
           </TouchableOpacity>
@@ -365,7 +384,12 @@ export default function Cardapio({ route }) {
         </View>
       </Modal>
 
-      <View style={{ flex: 1, backgroundColor: '#FFF', padding: 10, flexDirection: 'row', borderWidth: 1 }}>
+      <View style={{ flex: 1, backgroundColor: '#FFF', padding: 10, flexDirection: 'row', borderWidth: 1, justifyContent:"center",   ...Platform.select({
+      android: {
+        padding: 10,
+        
+      }
+    }) }}>
         <TouchableOpacity onPress={adicionarPrato} style={styles.buttonFim}>
           <Text style={{ color: '#fff' }}>Adicionar Prato</Text>
         </TouchableOpacity>
@@ -386,12 +410,19 @@ const styles = StyleSheet.create({
 
 
   containerLogo: {
-    backgroundColor: '#EA8841',
     flexDirection: "row",
-    width: "100%",
-    height: 80,
+    width:'100%',
+    marginTop:'4%',
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: '#EA8841',
+    marginBottom:'4%',
+    ...Platform.select({
+      android: {
+        width: "100%",
+        height: 80,
+      }
+    })
   },
 
   button: {
@@ -401,9 +432,16 @@ const styles = StyleSheet.create({
     width: 200,
     alignSelf: "center",
     alignItems: "center",
-    marginTop: '5%',
+    marginTop: '1%',
     borderWidth: 1,
     justifyContent: 'center',
+    ...Platform.select({
+      android: {
+        width: 200,
+        paddingVertical: 8,
+        marginTop: '5%',
+      }
+    })
   },
 
   buttonFim: {
@@ -414,21 +452,41 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     alignItems: "center",
     alignContent: 'center',
+    justifyContent:"center",
     borderWidth: 1,
-    marginHorizontal: '5%'
+    marginHorizontal: '5%',
+    ...Platform.select({
+      android: {
+        marginHorizontal: '5%',
+        width: 150,
+      }
+    })
   },
   pratoItem: {
     marginVertical: 15,
     padding: 5,
-    width: '95%',
+    width: '50%',
     alignSelf: 'center',
     borderRadius: 20,
     borderWidth: 1,
     flexDirection: 'row',
     flex: 1,
+    ...Platform.select({
+      android: {
+        marginVertical: 15,
+        padding: 5,
+        width: '95%',
+      }
+    })
   },
   info: {
     flexDirection: 'row',
+    ...Platform.select({
+      android: {
+
+        
+      }
+    })
   },
   infoTexto: {
     justifyContent: 'space-around',
@@ -445,14 +503,28 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 0,
     borderBottomWidth: 1,
-    marginLeft: 5,
+    
     width: 200,
     position: 'absolute',
-    right: '15%',
-    paddingLeft: 10
+    right: '45%',
+    paddingLeft: 10,
+    ...Platform.select({
+      android: {
+        width: 200,
+        right: '15%',
+        paddingLeft: 10,
+        marginLeft: 5,
+      }
+    })
   },
   textInput: {
     borderWidth: 0,
-    marginRight: '65%',
+    marginRight: '56%',
+    ...Platform.select({
+      android: {
+        marginRight: '65%'
+        
+      }
+    })
   },
 });

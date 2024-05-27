@@ -11,6 +11,7 @@ import {
   FlatList,
   Modal,
   ActivityIndicator,
+  Platform
 } from "react-native";
 
 export default function Pedidos({ route }) {
@@ -26,7 +27,7 @@ export default function Pedidos({ route }) {
   }
 
   const listarPedidos = async () => {
-    await axios.get(`http://192.168.0.8:3000/${idR}/pedidos`)
+    await axios.get(`https://pede-ja.onrender.com/${idR}/pedidos`)
       .then((response) => {
         setData(response.data);
       })
@@ -35,14 +36,12 @@ export default function Pedidos({ route }) {
       });
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      setIsLoading(true);
-      listarPedidos();
-      setPedidoDeletado(false);
-      setIsLoading(false);
-    }, [pedidoDeletado])
-  );
+  useEffect(() => {
+    setIsLoading(true);
+    listarPedidos();
+    setPedidoDeletado(false);
+    setIsLoading(false);
+  }, [pedidoDeletado]);
 
   const handleSelect = (pedido) => {
     setIsLoading(true);
@@ -53,7 +52,7 @@ export default function Pedidos({ route }) {
 
   const handleOrderDone = async () => {
     const idP = parseInt(selectedItem.idPedido, 10);
-    await axios.put(`http://192.168.0.8:3000/${idR}/pedidos/${idP}`)
+    await axios.put(`https://pede-ja.onrender.com/${idR}/pedidos/${idP}`)
       .then(() => {
         setSelectedItem(null);
         setPedidoDeletado(true);
@@ -66,7 +65,7 @@ export default function Pedidos({ route }) {
 
   const handleDeleteOrder = async () => {
     const idP = parseInt(selectedItem.idPedido, 10);
-    await axios.delete(`http://192.168.0.8:3000/${idR}/pedidos/${idP}`)
+    await axios.delete(`https://pede-ja.onrender.com/${idR}/pedidos/${idP}`)
       .then(() => {
         setSelectedItem(null);
         setVisibleModal(false);
@@ -87,7 +86,7 @@ export default function Pedidos({ route }) {
       </View>
 
       <View style={styles.containerForm}>
-        <View style={{ height: '97%' }}>
+        <View style={{ height: '97%',  }}>
           <FlatList
             data={data}
             keyExtractor={(item) => item.idPedido.toString()}
@@ -139,12 +138,17 @@ export default function Pedidos({ route }) {
         style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
         visible={visibleModal}
       >
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1  }}>
           {selectedItem && (
 
-            <View style={{ flex: 1, borderWidth: 1, backgroundColor: 'white', padding: 20, borderRadius: 5, }}>
+            <View style={{ flex: 1, borderWidth: 1, backgroundColor: 'white', padding: 20, borderRadius: 5,  }}>
 
-              <View style={{ flexDirection: "row", marginBottom: 0, height: 55, borderWidth: 1, }}>
+              <View style={{ flexDirection: "row", marginBottom: 0, height: 55, borderWidth: 1, width:'70%', alignSelf:"center", ...Platform.select({
+      android: {
+        height: 55,
+        marginBottom: 0
+      }
+    }) }}> 
                 <View style={{ flex: 1, alignItems: "center" }}>
                   <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Cliente: ${selectedItem.cliente}`}</Text>
                 </View>
@@ -156,7 +160,12 @@ export default function Pedidos({ route }) {
                 </View>
               </View>
 
-              <View style={{ flexDirection: "row", borderWidth: 0, marginBottom: 0, padding: 5 }}>
+              <View style={{ flexDirection: "row", borderWidth: 0, marginBottom: 0, padding: 5, width:"70%", alignSelf:"center", ...Platform.select({
+      android: {
+        padding: 5,
+        marginBottom: 0
+      }
+    })}}>
                 <View style={{ flex: 1, alignItems: "center" }}>
                   <Text style={{ fontWeight: "bold", color: "#EA8841", }}>{`Pedido n°: ${selectedItem.numeroPedido}`}</Text>
                 </View>
@@ -165,7 +174,12 @@ export default function Pedidos({ route }) {
                 </View>
               </View>
 
-              <View style={{ flexDirection: "row", marginBottom: 10, borderWidth: 0, padding: 3.6 }}>
+              <View style={{ flexDirection: "row", marginBottom: 10, borderWidth: 0, padding: 3.6, width:'70%',  alignSelf:"center", ...Platform.select({
+      android: {
+        marginBottom: 10,
+        padding: 3.6
+      }
+    })}}>
                 <View style={{ flex: 1, alignItems: "center" }}>
                   <Text style={{ fontWeight: "bold", color: "#EA8841" }}>Nome:</Text>
                 </View>
@@ -180,7 +194,7 @@ export default function Pedidos({ route }) {
                 </View>
               </View>
 
-              <View style={{ flex: 2, borderWidth: 1, }}>
+              <View style={{ flex: 2, borderWidth: 1, width:"70%", alignSelf:"center"}}>
                 <ScrollView>
                   {selectedItem.pratos.map((prato, index) => (
                     <View key={index} style={{ flexDirection: "row", borderBottomWidth: 1, width: '100%', marginBottom: 5, alignItems: "center" }}>
@@ -202,7 +216,7 @@ export default function Pedidos({ route }) {
               </View>
 
               <View style={{ flex: 1 }}>
-                <Text style={{ fontWeight: "bold", color: "#EA8841", marginTop: 10, }}>{`Valor Total: ${selectedItem.valorTotal}`}</Text>
+                <Text style={{ fontWeight: "bold", color: "#EA8841", marginTop: 10, marginLeft:"15%"}}>{`Valor Total: ${selectedItem.valorTotal}`}</Text>
 
                 <TouchableOpacity style={styles.button} onPress={handleOrderDone}>
                   <Text>Pedido feito</Text>
@@ -229,41 +243,68 @@ export default function Pedidos({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EA8841"
+    backgroundColor: "#EA8841",
+    ...Platform.select({
+      android: {
+
+      }
+    })
   },
   containerLogo: {
-    marginTop: '5%',
     flexDirection: "row",
-    width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: '#EA8841'
+    backgroundColor: '#EA8841',
+    ...Platform.select({
+      android: {
+        marginTop: '5%',
+        width: "100%",
+      }
+    })
   },
   containerForm: {
     flex: 1,
     backgroundColor: '#ffffff',
     borderRadius: 10,
-    paddingStart: "5%",
-    paddingEnd: "5%",
-    marginTop: "10%",
+    ...Platform.select({
+      android: {
+        paddingStart: "5%",
+        paddingEnd: "5%",
+        marginTop: "10%",
+      }
+    })
   },
   button: {
     backgroundColor: "#EA8841",
     borderRadius: 50,
-    paddingVertical: 8,
-    width: "60%",
     alignSelf: "center",
-    marginTop: 15,
     alignItems: "center",
     justifyContent: "center",
+    width: "15%",
+    paddingVertical: 8,
+    marginTop:'1%',
+    ...Platform.select({
+      android: {
+        marginTop: 15,
+        paddingVertical: 8,
+        width: "60%",
+      }
+    })
   },
 
   flatList: {
     borderWidth: 1,
     alignSelf: "center",
-    marginTop: '3%',
     borderRadius: 15,
-    padding: 10,
-    width: '100%'
+    marginTop: '3%',
+    width: '40%',
+    paddingHorizontal:'2%',
+    ...Platform.select({
+      android: {
+        padding: 10,
+        width: '100%',
+        marginTop: '3%',
+      }
+    })
   }
 });

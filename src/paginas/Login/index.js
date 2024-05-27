@@ -11,6 +11,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Platform
 } from "react-native";
 
 export default function Login() {
@@ -36,7 +37,7 @@ export default function Login() {
       }
     }
     console.log(login)
-    await axios.post('http://192.168.0.8:3000/login', login).then(function (resposta) {
+    await axios.post('https://pede-ja.onrender.com/login', login).then(function (resposta) {
       idR = resposta.data.idRestaurante
       setLogin({ email: '', senha: '' })
       navigation.navigate('Cardapio', { idR: idR });
@@ -48,30 +49,72 @@ export default function Login() {
 
   return (
     <ScrollView style={{ backgroundColor: '#ffffff' }}>
+      
       <View style={styles.container}>
+      
         <View style={styles.containerLogo}>
-          <Text style={{ color: "#FFFFFF", fontSize: 36 }}>PEDE</Text>
+          
+          <Text style={{ color: "#FFFFFF", fontSize:36,...Platform.select({
+      android: {
+        fontSize: 36
+      }
+    }) }}>PEDE</Text>
+          
           <Image source={require('../../assets/imagens/burger.png')} />
+          
           <Text style={{ color: "#fff", fontSize: 36 }}>JÁ</Text>
+        
         </View>
+        
         <View style={styles.containerForm}>
-          <Text style={{ color: "#EA8841", fontSize: 40, textAlign: "center", marginTop: "10%" }}>Login</Text>
-          <View style={{ flexDirection: "row", borderBottomWidth: 1, width: "85%", marginLeft: "7%", marginTop: "10%" }}>
-            <Image source={require("../../assets/imagens/Letter.png")} style={{ width: 26, marginRight: "3%", }} />
+          
+          <Text style={{ color: "#EA8841", fontSize: 40, textAlign: "center", marginTop: "5%", ...Platform.select({
+      android: {
+        marginTop: "10%",
+        fontSize: 40
+      }
+    })}}>Login</Text>
+
+          <View style={{ flexDirection: "row", borderBottomWidth: 1, width: "30%", alignSelf:'center', marginTop: "3%", ...Platform.select({
+      android: {
+        marginTop: "10%",
+        marginLeft: "7%",
+         width: "85%"
+      }
+    })}}>
+            
+            <Image source={require("../../assets/imagens/Letter.png")} style={{ width: 26, }} />
+            
             <TextInput
               placeholder="Email"
               value={login.email}
               onChangeText={(text) => setLogin({ ...login, email: text })}
-              style={{ marginLeft: "3%", width:'85%'}}
+              style={{ marginLeft: "3%", width:'100%', ...Platform.select({
+                android: {
+                  marginLeft: "5%",
+                  width:'85%'
+
+                }
+              })}}
             />
+         
           </View>
-          <View style={{ flexDirection: "row", borderBottomWidth: 1, width: "85%", marginLeft: "7%", marginTop: "10%" }}>
+          
+          <View style={{ flexDirection: "row", borderBottomWidth: 1, width: "30%", alignSelf:"center", marginTop: "3%", ...Platform.select({
+      android: {
+        marginTop: "10%",
+        marginLeft: "7%",
+         width: "85%"
+      }
+    })
+          
+      }}>
             <Image source={require("../../assets/imagens/Lock.png")} />
             <TextInput
               placeholder="Senha"
               value={login.senha}
               onChangeText={(text) => setLogin({ ...login, senha: text })}
-              style={{ marginLeft: "5%", width:'85%' }}
+              style={{ marginLeft: "3%", width:'100%',  }}
             />
           </View>
           <View style={{ flexDirection: "row", alignSelf: "center", marginTop: "5%" }}>
@@ -97,35 +140,66 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EA8841"
+    backgroundColor: "#EA8841",
+    ...Platform.select({
+      android: {
+
+      }
+    })
   },
   containerLogo: {
-    marginTop: "15%",
-    marginBottom: "0%",
+    
+    
     flexDirection: "row",
-    width: "100%",
+    width:'100%',
+    marginTop:'7%',
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: '#EA8841'
+    backgroundColor: '#EA8841',
+    marginBottom:'7%',
+    
+    ...Platform.select({
+      android: {
+        width: "100%",
+        marginTop: "15%",
+        marginBottom: "0%",
+        
+      }
+    })
   },
   containerForm: {
     flex: 1,
     backgroundColor: '#ffffff',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    paddingStart: "5%",
-    paddingEnd: "5%",
-    marginTop: "15%"
+    
+    ...Platform.select({
+      android: {
+        paddingStart: "5%",
+        paddingEnd: "5%",
+        marginTop: "15%"
+        
+      }
+    })
   },
   button: {
     backgroundColor: "#EA8841",
     borderRadius: 50,
+    width: "20%",
+    marginTop: "1%",
     paddingVertical: 8,
-    width: "60%",
+    
     alignSelf: "center",
-    marginTop: "11%",
+    
     alignItems: "center",
     justifyContent: "center",
+    ...Platform.select({
+      android: {
+        width: "60%",
+        marginTop: "9%",
+        paddingVertical: 8,
+      }
+    })
 
   },
 });
